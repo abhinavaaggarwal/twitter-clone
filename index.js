@@ -1,11 +1,9 @@
 import { tweetsData } from "./data.js";
-
-const tweetInput = document.getElementById("tweet-input")
-const tweetBtn = document.getElementById("tweet-btn")
+import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
 document.addEventListener("click", function(e) {
     if(e.target.dataset.reply) {
-        console.log(e.target.dataset.reply)
+        handleReplyClick(e.target.dataset.reply)
     }
     else if(e.target.dataset.like) {
         handleLikeClick(e.target.dataset.like)
@@ -13,7 +11,20 @@ document.addEventListener("click", function(e) {
     else if(e.target.dataset.retweet) {
         handleRetweetClick(e.target.dataset.retweet)
     }
+    else if(e.target.id === "tweet-btn") {
+        handleBtnClick()
+    }
+    
+    // console.log(e)
 })
+
+function handleReplyClick(tweetId) {
+    const tweetIDObj = tweetsData.filter(function(tweet) {
+        return tweet.uuid === tweetId
+    })[0]
+
+    document.getElementById(`replies-${tweetIDObj.uuid}`).classList.toggle("hidden")
+}
 
 function handleLikeClick(tweetId) {
     const tweetIdObj = tweetsData.filter(function(tweet) {
@@ -46,6 +57,27 @@ function handleRetweetClick(tweetId) {
     render()
 }
 
+function handleBtnClick() {
+
+    const tweetInput = document.getElementById("tweet-input")
+
+    if(tweetInput.value) {
+        tweetsData.unshift({
+            handle: `@Test User`,
+            profilePic: `images/scrimbalogo.png`,
+            likes: 0,
+            retweets: 0,
+            tweetText: tweetInput.value,
+            replies: [],
+            isLiked: false,
+            isRetweeted: false,
+            uuid: uuidv4() 
+        })
+        tweetInput.value = ""
+        render()
+    }
+}
+
 function getFeedHtml() {
     let feedHtml = ``
 
@@ -61,6 +93,22 @@ function getFeedHtml() {
 
         if(tweet.isRetweeted) {
             iconRetweetClass = "retweeted"
+        }
+
+        let repliesHtml = ``
+
+        if(tweet.replies.length > 0) {
+            tweet.replies.forEach(function(reply) {
+                repliesHtml += `<div class="tweet-reply">
+                <div class="tweet-inner">
+                    <img src="${reply.profilePic}" class="profile-pic">
+                        <div>
+                            <p class="handle">${reply.handle}</p>
+                            <p class="tweet-text">${reply.tweetText}</p>
+                        </div>
+                    </div>
+            </div>`
+            })
         }
 
         feedHtml += `<div class="tweet">
@@ -84,6 +132,9 @@ function getFeedHtml() {
                     </span>
                 </div>   
             </div>            
+        </div>
+        <div class="hidden" id="replies-${tweet.uuid}">
+            ${repliesHtml}
         </div>
     </div>`
     })
