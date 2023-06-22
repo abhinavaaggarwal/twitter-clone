@@ -29,6 +29,14 @@ i{
   color: limegreen;
 }
 
+.delete {
+    display: none !important;
+}
+
+.fa-trash-can:hover {
+    color: red;
+}
+
 /* layout */
 
 main, header{
@@ -78,6 +86,11 @@ button{
     padding: 20px 0 0 0;
     width: 100%;
     margin: 15px 0;
+}
+
+#send-reply-text {
+    border: 1px solid black;
+    border-radius: 4px;
 }
 
 .tweet-inner{

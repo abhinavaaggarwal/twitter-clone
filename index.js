@@ -14,6 +14,12 @@ document.addEventListener("click", function(e) {
     else if(e.target.id === "tweet-btn") {
         handleBtnClick()
     }
+    else if(e.target.dataset.delete) {
+        handleDeleteClick(e.target.dataset.delete)
+    }
+    else if(e.target.id === "send-reply-btn") {
+        handleSendReplyBtn(e.target.dataset.send)
+    }
     
     // console.log(e)
 })
@@ -22,7 +28,7 @@ function handleReplyClick(tweetId) {
     const tweetIDObj = tweetsData.filter(function(tweet) {
         return tweet.uuid === tweetId
     })[0]
-
+    console.log(tweetId)
     document.getElementById(`replies-${tweetIDObj.uuid}`).classList.toggle("hidden")
 }
 
@@ -63,7 +69,7 @@ function handleBtnClick() {
 
     if(tweetInput.value) {
         tweetsData.unshift({
-            handle: `@Test User`,
+            handle: `@Test_User`,
             profilePic: `images/scrimbalogo.png`,
             likes: 0,
             retweets: 0,
@@ -78,6 +84,34 @@ function handleBtnClick() {
     }
 }
 
+function handleDeleteClick(tweetId, index) {
+    tweetsData.forEach(function(tweet) {
+        if(tweet.uuid === tweetId) {
+            tweetsData.splice(index, 1)
+        }
+    })
+
+    render()
+}
+
+function handleSendReplyBtn(tweetId) {
+    const tweetReplyText = document.getElementById("send-reply-text").value
+
+    let tweetIDObj = tweetsData.filter(function(tweet) {
+        return tweet.uuid === tweetId
+    })[0]
+
+    if(tweetReplyText) {
+        tweetIDObj.replies.unshift({
+            handle: `@Test_User`,
+            profilePic: `images/scrimbalogo.png`,
+            tweetText: tweetReplyText
+        },) 
+        
+        render()
+    }   
+}
+
 function getFeedHtml() {
     let feedHtml = ``
 
@@ -86,6 +120,7 @@ function getFeedHtml() {
         /* we have made these two variables to store the class that contains  the styling of clicked icons. So when a user click an icon we call render method to render the number of counts. So then we will append the class for the particular tweet*/
         let iconLikeClass = ""
         let iconRetweetClass = ""
+        let iconDeleteClass = "delete"
 
         if(tweet.isLiked) {
             iconLikeClass = "liked"
@@ -95,7 +130,19 @@ function getFeedHtml() {
             iconRetweetClass = "retweeted"
         }
 
-        let repliesHtml = ``
+        if(tweet.handle === "@Test_User") {
+            iconDeleteClass = ""
+        }
+
+        let repliesHtml = `<div class="tweet-reply">
+        <div class="tweet-inner">
+            <img src="images/scrimbalogo.png" class="profile-pic">
+                <div class="tweet-reply-area">
+                    <textarea id="send-reply-text"></textarea>
+                    <button id="send-reply-btn" data-send="${tweet.uuid}">Send</button>
+                </div>
+            </div>
+    </div>`
 
         if(tweet.replies.length > 0) {
             tweet.replies.forEach(function(reply) {
@@ -129,6 +176,9 @@ function getFeedHtml() {
                     <span class="tweet-detail">
                         <i class="fa-solid fa-retweet ${iconRetweetClass}" data-retweet="${tweet.uuid}"></i>
                         ${tweet.retweets}
+                    </span>
+                    <span class="tweet-detail ${iconDeleteClass}">
+                        <i class="fa-solid fa-trash-can" data-delete="${tweet.uuid}"></i>
                     </span>
                 </div>   
             </div>            
